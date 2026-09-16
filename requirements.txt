@@ -1,0 +1,11 @@
+# Core dependencies for the dataset ingestion pipeline.
+# ai-toolkit-perceptual's own requirements.txt handles the training
+# dependencies (torch, diffusers, transformers, etc.) -- installed
+# separately by setup/00_install_ai_toolkit_perceptual.bat.
+
+opencv-python-headless>=4.9
+numpy>=1.26
+Pillow>=10.0
+onnxruntime>=1.17
+spandrel>=0.3
+huggingface_hub>=0.24

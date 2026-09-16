@@ -1,0 +1,23 @@
+# Downloaded/generated at setup or runtime -- never commit these
+ai-toolkit-perceptual/
+model_cache/
+models/
+workspace/
+*.safetensors
+*.onnx
+*.pth
+*.ckpt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
