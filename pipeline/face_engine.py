@@ -107,7 +107,27 @@ class FaceEngine:
             "pose": pose,
             "width": w_orig,
             "height": h_orig,
+            "shot_type": self.classify_shot_type(y2 - y1, h_orig),
         }
+
+    @staticmethod
+    def classify_shot_type(face_box_height, img_height):
+        """
+        Classifies framing from the detected face box's height relative to
+        the full image height. This is what the original crop logic never
+        checked -- it assumed every accepted photo was a tight headshot and
+        force-cropped it to head/torso, destructively discarding full-body
+        and half-body shots (see docs/KREA2_FINDINGS.md, "Framing bug").
+        """
+        ratio = face_box_height / float(img_height)
+        if ratio >= 0.32:
+            return "closeup"
+        elif ratio >= 0.16:
+            return "portrait"
+        elif ratio >= 0.07:
+            return "half_body"
+        else:
+            return "full_body"
 
     def extract_embedding(self, img_bgr_or_rgb, box=None, is_rgb=False):
         """Extracts a 512-dim, unit-normalized ArcFace identity embedding."""

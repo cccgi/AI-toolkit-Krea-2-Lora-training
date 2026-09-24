@@ -4,6 +4,57 @@ This document is the research trail behind this repository's default
 settings. It records what was tried, what worked, what didn't, and
 why -- so future changes don't repeat solved problems.
 
+## Pipeline audit: two dataset-prep bugs found and fixed (ported from the Flux.2 audit)
+
+The same two dataset-ingestion bugs identified and fixed in this
+project's parallel Flux.2 Klein pipeline were audited for here and
+confirmed present, then fixed:
+
+**Bug 1 -- full-body shots forcibly cropped to head/torso portrait.**
+`calculate_smart_portrait_crop()` originally used one fixed set of
+margins (`bh*1.85` below the detected face box, etc.) applied to every
+accepted image unconditionally, regardless of whether the source photo
+was a tight closeup or a full-body shot. A full-body photo lost all of
+its body content, cropped down to the same head/torso framing as a
+closeup. Fixed by adding `FaceEngine.classify_shot_type()`, which
+buckets each detection into `closeup` / `portrait` / `half_body` /
+`full_body` from the ratio of detected face-box height to full image
+height, and `calculate_smart_portrait_crop()` now branches on that
+classification -- `full_body` detections keep the entire frame (only a
+small horizontal border is trimmed), `half_body` and `portrait` use
+progressively tighter margins, and only `closeup` uses the original
+tight head/torso margins. Holdout partitioning was also changed to
+stratify by `shot_type` in addition to `pose`, so full-body examples
+are represented in both the training set and the true-holdout
+evaluation set, not silently concentrated in one or dropped from
+holdouts entirely.
+
+**Bug 2 -- generic, repeating captions.** The original captioning was
+purely templated: `build_caption()` combined the trigger token, class
+noun, and one of only 5 possible `pose` bucket phrases (`frontal`,
+`three_quarter_left`, etc.), so a 20-image dataset produced at most 5
+distinct caption strings, each repeated across every image sharing
+that pose bucket -- e.g. every three-quarter-right photo got the exact
+same caption text regardless of what was actually in the frame
+(clothing, setting, action, background). Unlike the Flux.2 pipeline,
+this Krea-2 pipeline never had a second real captioning stage at all
+-- there was no VLM-based per-image description step to audit for a
+double-write/overwrite bug; the single templated pass was the only
+caption source. Fixed by adding `pipeline/caption_engine.py`, which
+runs BLIP (`Salesforce/blip-image-captioning-large`) once per accepted
+training image to generate a real, content-aware description, then
+splices the trigger token onto that description
+(`build_full_caption()`). The pose/shot-type template
+(`build_caption_fallback()`) is now used only as a fallback if BLIP
+captioning throws an exception for a specific image, never as the
+default caption source.
+
+Both fixes are exercised by a single ingestion pass -- there is no
+separate "re-run captioning" or "re-run cropping" script to remember;
+running `pipeline/ingest_dataset.py` (or the full
+`RUN_ME_train_lora.bat` chain) picks up both fixes automatically for
+any new dataset.
+
 ## Summary
 
 | Configuration | Steps | Rank | Face-mask weighting | Peak ArcFace similarity | Status |

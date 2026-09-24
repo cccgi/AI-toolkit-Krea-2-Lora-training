@@ -1,7 +1,8 @@
 # Core dependencies for the dataset ingestion pipeline.
-# ai-toolkit-perceptual's own requirements.txt handles the training
-# dependencies (torch, diffusers, transformers, etc.) -- installed
-# separately by setup/00_install_ai_toolkit_perceptual.bat.
+# ai-toolkit-perceptual's own requirements.txt handles torch and
+# transformers (installed by setup/00_install_ai_toolkit_perceptual.bat)
+# -- pipeline/caption_engine.py's BLIP model depends on both and is
+# meant to run inside that same conda env, not standalone.
 
 opencv-python-headless>=4.9
 numpy>=1.26
