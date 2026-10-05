@@ -9,9 +9,9 @@ REM ============================================================
 setlocal
 
 REM ---- EDIT THESE 4 VALUES FOR YOUR SUBJECT -------------------
-set SUBJECT_NAME=kimberly
-set RAW_PHOTOS_DIR=C:\path\to\your\raw\photos\folder
-set TRIGGER=kmb
+set SUBJECT_NAME=myryka
+set RAW_PHOTOS_DIR=E:\raw-lora-photos\Myryka
+set TRIGGER=myryka
 set CLASS_NOUN=woman
 REM --------------------------------------------------------------
 
